@@ -1,11 +1,5 @@
 import argparse
-import pandas as pd
 from rapidfuzz import process
-
-MINT_CAT_FILTERS = [
-    "Credit Card Payment",
-    "Hide from Budgets & Trends",
-    ]
 
 def get_arguments():
     parser = argparse.ArgumentParser(
@@ -15,35 +9,6 @@ def get_arguments():
     parser.add_argument('sw_filename', help='splitwise full transaction sheet')
 
     return parser.parse_args()
-
-# "Date","Description","Original Description","Amount","Transaction Type","Category","Account Name","Labels","Notes"
-def parse_mint_transactions(filename: str):
-    mint = pd.read_csv(filename, parse_dates=["Date"])
-    mint = mint[~mint["Category"].isin(MINT_CAT_FILTERS)]
-    mint = mint[["Date", "Description", "Amount", "Category"]]
-    mint = mint.sort_values(by=['Date'])
-    print("------------------")
-    print("Mint Transactions")
-    print("------------------")
-    print(mint)
-    return {"all_descriptions": mint["Description"].to_list(), "records": mint.to_dict("records")}
-
-# Date,Description,Category,Cost,Currency,Matthew Nguyen,Roselle Ardosa
-def parse_splitwise_transactions(filename: str, month: int):
-    sw = pd.read_csv(filename, parse_dates=["Date"])
-    sw = sw[sw["Date"].dt.month == month]
-    sw = sw[sw["Description"] != "Total balance"]
-    sw = sw[~(sw["Description"].str.contains("Roselle A. paid Matthew N.") | sw["Description"].str.contains("Matthew N. paid Roselle A."))]
-    sw = sw[["Date", "Description", "Cost", "Matthew Nguyen"]]
-    sw = sw.rename({"Cost": "Total", "Matthew Nguyen": "Personal Amount"}, axis='columns')
-    # not sure why it converts Total to a string, but it does
-    sw["Total"] = sw["Total"].astype(float)
-    sw = sw.sort_values(by=['Date'])
-    print("-----------------------")
-    print("Splitwise Transactions")
-    print("-----------------------")
-    print(sw)
-    return sw.to_dict("records")
 
 # something something tf-idf information retrieval class...... i'm kinda dumb for this and just want it to work
 def find_similar_transaction(sw_description: str, mint_descriptions: list):
@@ -102,7 +67,7 @@ def merge_matched(matched_list, mint_records):
 def main():
     args = get_arguments()
     mint_records = parse_mint_transactions(args.mint_filename)
-    sw_records = parse_splitwise_transactions(args.sw_filename, 12)
+    sw_records = parse_splitwise_transactions(args.sw_filename, 1)
     new_transactions, matched_transactions = find_matching_transactions(sw_records, mint_records["records"])
     mint_records["records"] = merge_matched(matched_transactions, mint_records["records"])
     mint_records["records"].extend(new_transactions)
