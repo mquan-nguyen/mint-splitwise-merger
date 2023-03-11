@@ -1,7 +1,6 @@
 import pandas as pd
 from ledger import Ledger
-from splitwise_transaction import SplitwiseTransaction
-from transaction import Transaction
+from transaction import *
 
 MINT_CAT_FILTERS = [
     "Credit Card Payment",
@@ -12,7 +11,14 @@ def dataframe_to_mint_ledger(df):
     book = Ledger()
     for x in df.iterrows():
         x = x[1]
-        book.add_transaction(Transaction(date=x["Date"], category=x["Category"], description=x["Description"], amount=x["Amount"]))
+        book.add_transaction(MintTransaction
+                             (
+                              date=x["Date"], 
+                              category=x["Category"],
+                              description=x["Description"], 
+                              amount=x["Amount"]
+                              )
+                            )
     return book
 
 
@@ -21,7 +27,15 @@ def dataframe_to_splitwise_ledger(df):
     book = Ledger()
     for x in df.iterrows():
         x = x[1]
-        book.add_transaction(SplitwiseTransaction(date=x["Date"], category=x["Category"], description=x["Description"], amount=x["Amount"], personal_amount=x["Personal Amount"]))
+        # TBD -> splitwise.amount = total & splitwise.personal_amount = personal amount?
+        book.add_transaction(
+            SplitwiseTransaction(
+                date=x["Date"], 
+                description=x["Description"], 
+                total_amount=x["Total"], 
+                personal_amount=x["Personal Amount"]
+            )
+        )
     return book
 
 # "Date","Description","Original Description","Amount","Transaction Type","Category","Account Name","Labels","Notes"
@@ -50,5 +64,5 @@ def parse_splitwise_transactions(filename: str, month: int):
     print("-----------------------")
     print("Splitwise Transactions")
     print("-----------------------")
+    print(sw)
     return dataframe_to_splitwise_ledger(sw)
-parse_splitwise_transactions("matt-n-roselle_2023-01-02_export.csv", 12)
