@@ -5,6 +5,7 @@ import zlib
 # End result transaction. Most resembles the Mint transactions, and what is put into the excel sheet at the end
 @dataclass
 class Transaction:
+    # TODO NEXT: BRANCH OFF INTO MINT TRANSACTION & SPLITWISE TRANSACTION, MINT HAS CATEGORY SPLITWISE HAS PERSONAL AMT 
     date: date
     category: str
     description: str

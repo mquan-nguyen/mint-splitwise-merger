@@ -3,5 +3,5 @@ from dataclasses import dataclass
 
 
 @dataclass
-class MintTransaction(Transaction):
+class SplitwiseTransaction(Transaction):
     personal_amount: float
