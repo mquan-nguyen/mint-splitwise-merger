@@ -1,5 +1,4 @@
 import argparse
-from rapidfuzz import process
 
 def get_arguments():
     parser = argparse.ArgumentParser(
@@ -9,10 +8,6 @@ def get_arguments():
     parser.add_argument('sw_filename', help='splitwise full transaction sheet')
 
     return parser.parse_args()
-
-# something something tf-idf information retrieval class...... i'm kinda dumb for this and just want it to work
-def find_similar_transaction(sw_description: str, mint_descriptions: list):
-    return process.extract(sw_description, mint_descriptions)
     
 # at some point, probably good to translate this out to OOP (make a transaction an obj)
 # probably good to also add some margin of error (+-2 cents or something)
