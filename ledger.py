@@ -11,7 +11,7 @@ class Ledger:
 
     def add_transaction(self, t):
         # raise exception if fields are no good... yare yare
-        self.records[t.to_hash] = t
+        self.records[t.to_hash()] = t
     
     def remove_transaction(self, t):
         del self.records[t.to_hash()]
