@@ -49,17 +49,8 @@ def main():
 
     mint_ledger.merge_ledger(sw_ledger)
     
-    ## Add additional columns to match spreadsheet
-    #df = pd.DataFrame.from_records(mint_records["records"])
-    #df.insert(3, "Inflow", '')
-    #df.insert(4, "Account", "Checking Account")
-    #df = df.sort_values(by=['Date'])
-    #print(df)
-    #print("Copying transactions to clipboard....")
-    #df.to_clipboard(index=False, header=False)
-
-    for t in mint_ledger.records.values():
-        print(t)
+    mint_ledger.to_clipboard()
+    
     
 
 

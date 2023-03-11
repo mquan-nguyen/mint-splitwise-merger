@@ -1,6 +1,7 @@
 from transaction import Transaction
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import Dict
+import pandas as pd
 
 # Holds all the transactions
 
@@ -66,5 +67,12 @@ class Ledger:
             self.records[hash].amount -= sw_transaction.personal_amount
 
 
-    def to_clipboard():
-        pass
+    def to_clipboard(self):
+        # Add additional columns to match spreadsheet
+        df = pd.DataFrame.from_records([asdict(x) for x in self.records.values()])
+        df.insert(3, "Inflow", '')
+        df.insert(4, "Account", "Checking Account")
+        df = df.sort_values(by=['date'])
+        print("Copying transactions to clipboard....")
+        print(df)
+        df.to_clipboard(index=False, header=False)
