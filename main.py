@@ -1,4 +1,5 @@
 import argparse
+from csv_parser import *
 
 def get_arguments():
     parser = argparse.ArgumentParser(
@@ -9,15 +10,6 @@ def get_arguments():
 
     return parser.parse_args()
     
-# at some point, probably good to translate this out to OOP (make a transaction an obj)
-# probably good to also add some margin of error (+-2 cents or something)
-def find_same_price(sw_transaction: dict, mint_transactions: list):
-    for x in mint_transactions:
-        if sw_transaction["Total"] == x["Amount"]:
-            return x
-    
-    return None
-
 # matched -> {(splitwise, mint matching), ...}
 # new transactions -> list of records
 def find_matching_transactions(sw_transactions: list, mint_transactions: list):
@@ -38,15 +30,6 @@ def find_matching_transactions(sw_transactions: list, mint_transactions: list):
             new_transactions.append(conform_transaction(x))
     return new_transactions, matched_transactions
 
-# conform data structure to match mint's
-def conform_transaction(sw_transaction):
-    del sw_transaction["Total"]
-    sw_transaction["Amount"] = abs(sw_transaction["Personal Amount"])
-    del sw_transaction["Personal Amount"]
-    sw_transaction["Category"] = ""
-
-    return sw_transaction
-
 # take matched transaction list & merge transaction amount to reflect net amount, not gross
 # TODO: at some point should make the actual transaction list be a dict -> {hash involving date & description & amount: transaction}
 # will make this a smiple implementation & faster, but oh well
@@ -61,19 +44,22 @@ def merge_matched(matched_list, mint_records):
 
 def main():
     args = get_arguments()
-    mint_records = parse_mint_transactions(args.mint_filename)
-    sw_records = parse_splitwise_transactions(args.sw_filename, 1)
-    new_transactions, matched_transactions = find_matching_transactions(sw_records, mint_records["records"])
-    mint_records["records"] = merge_matched(matched_transactions, mint_records["records"])
-    mint_records["records"].extend(new_transactions)
+    mint_ledger = parse_mint_transactions(args.mint_filename)
+    sw_ledger = parse_splitwise_transactions(args.sw_filename, 2)
+
+    mint_ledger.merge_ledger(sw_ledger)
     
-    df = pd.DataFrame.from_records(mint_records["records"])
-    df.insert(3, "Inflow", '')
-    df.insert(4, "Account", "Checking Account")
-    df = df.sort_values(by=['Date'])
-    print(df)
-    print("Copying transactions to clipboard....")
-    df.to_clipboard(index=False, header=False)
+    ## Add additional columns to match spreadsheet
+    #df = pd.DataFrame.from_records(mint_records["records"])
+    #df.insert(3, "Inflow", '')
+    #df.insert(4, "Account", "Checking Account")
+    #df = df.sort_values(by=['Date'])
+    #print(df)
+    #print("Copying transactions to clipboard....")
+    #df.to_clipboard(index=False, header=False)
+
+    for t in mint_ledger.records.values():
+        print(t)
     
 
 
