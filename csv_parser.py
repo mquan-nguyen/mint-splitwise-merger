@@ -1,6 +1,7 @@
 import pandas as pd
 from ledger import Ledger
 from transaction import *
+import datetime
 
 MINT_CAT_FILTERS = [
     "Credit Card Payment",
@@ -51,9 +52,9 @@ def parse_mint_transactions(filename: str):
     return dataframe_to_mint_ledger(mint)
 
 # Date,Description,Category,Cost,Currency,Matthew Nguyen,Roselle Ardosa
-def parse_splitwise_transactions(filename: str, month: int):
+def parse_splitwise_transactions(filename: str, date_str: str):
     sw = pd.read_csv(filename, parse_dates=["Date"])
-    sw = sw[sw["Date"].dt.month == month]
+    sw = sw[sw["Date"] > date_str]
     sw = sw[sw["Description"] != "Total balance"]
     sw = sw[~(sw["Description"].str.contains("Roselle A. paid Matthew N.") | sw["Description"].str.contains("Matthew N. paid Roselle A."))]
     sw = sw[["Date", "Description", "Cost", "Matthew Nguyen"]]
